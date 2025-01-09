@@ -22,7 +22,16 @@ mod tests {
     use super::*;
 
     #[test]
-    fn it_works() {
+    fn entries_ok() {
+        let result = entry_names_sorted("./testing/");
+        assert!(result.is_ok());
+    }
 
+    #[test]
+    fn entries_sorted() {
+        let result = entry_names_sorted("./testing/").expect("io error");
+        assert_eq!(result[0], OsString::from("a.txt"));
+        assert_eq!(result[1], OsString::from("b"));
+        assert_eq!(result[2], OsString::from("c.txt"));
     }
 }
