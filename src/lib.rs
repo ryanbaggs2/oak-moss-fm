@@ -1,17 +1,24 @@
-//! A simple file manager.
+//! A simple file manager, will later include tags to search for related
+//! files and directories, color labels, and other metadata.
 
 use std::{fs, io};
 use std::ffi::{OsString};
 use std::fs::DirBuilder;
 
-pub fn working_dir_entry_names_sorted() -> Result<Vec<OsString>, io::Error> {
-    entry_names_sorted(".")
+/// Returns names of entries in the current working directory.
+///
+/// May return an io Error.
+pub fn working_dir_sorted_entries() -> io::Result<Vec<OsString>> {
+    sorted_entries(".")
 }
 
-pub fn entry_names_sorted(path: &str) -> Result<Vec<OsString>, io::Error> {
+/// Returns names of entries within the specified path.
+///
+/// May return an io Error.
+pub fn sorted_entries(path: &str) -> io::Result<Vec<OsString>> {
     let mut entry_names = fs::read_dir(path)?
         .map(|result| result.map(|entry| entry.file_name()))
-        .collect::<Result<Vec<_>, io::Error>>()?;
+        .collect::<io::Result<Vec<_>>>()?;
 
     entry_names.sort();
 
@@ -20,7 +27,7 @@ pub fn entry_names_sorted(path: &str) -> Result<Vec<OsString>, io::Error> {
 
 /// Creates the specified directory with default builder options.
 ///
-/// If the directory exists, an error is returned.
+/// If the directory already exists, an error is returned.
 pub fn create_dir(path: &str) -> io::Result<()> {
     DirBuilder::new().create(path)?;
     Ok(())
@@ -33,13 +40,13 @@ mod tests {
 
     #[test]
     fn entries_ok() {
-        let result = entry_names_sorted("./testing/");
+        let result = sorted_entries("./testing/");
         assert!(result.is_ok());
     }
 
     #[test]
     fn entries_sorted() {
-        let result = entry_names_sorted("./testing/").expect("io error");
+        let result = sorted_entries("./testing/").expect("io error");
         assert_eq!(result[0], OsString::from("a.txt"));
         assert_eq!(result[1], OsString::from("b"));
         assert_eq!(result[2], OsString::from("c.txt"));
